@@ -1,4 +1,8 @@
-(add new changes on top of this file)
+09-11-11 Dan Osipov  <dosipov@phillyburbs.com>
+
+	* Better compatibility with PHP 5.3 by removing calls to deprecated functions
+	* New function addTimeout, which adjusts the lifetime of cache based on the next record that will go live
+	* New options for extensibility by introduction of several hooks and splitting up methods
 
 09-05-13 Dan Osipov  <dosipov@phillyburbs.com>
 

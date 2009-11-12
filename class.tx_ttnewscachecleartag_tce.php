@@ -32,20 +32,6 @@
 class tx_ttnewscacheClearTag_tcemain {
 
 	var $extKey = 'ttnewscache_cleartag';
-
-	
-	/**
-	 * TCEmain hook used to get old values of 'categories' and 'related' in case of 'update' of the record.
-	 *
-	 * @param	array		Form fields.
-	 * @param	array		Table the record belongs to.
-	 * @param	integer		Id of the record.
-	 * @param	object		Parent object.
-	 * @return	void
-	 */
-	function processDatamap_preProcessFieldArray($incomingArray, $table, $id, &$thisRef) {
-		//DebugBreak();
-	}
 	
 	/**
 	 * TCEmain hook used to take care of 'delete' record.
@@ -76,14 +62,49 @@ class tx_ttnewscacheClearTag_tcemain {
 	 */
 	function processDatamap_afterDatabaseOperations($status, $table, $id, &$fieldArray, &$thisRef) {
 		if ($table == 'tt_news') {
-			if (intval($thisRef->datamap['tt_news'][$id]['category']) != 1) {
-				$cats = split(',', t3lib_div::rm_endcomma($thisRef->datamap['tt_news'][$id]['category']));
+			if (!empty($thisRef->datamap['tt_news'][$id]['category'])) {
+				$cats = explode(',', t3lib_div::rm_endcomma($thisRef->datamap['tt_news'][$id]['category']));
 				$this->flushListCache($cats);
 			}
-			if ($status == 'update') {
+			else if (!isset($thisRef->datamap['tt_news'][$id]['category'])) {
+				// Find category from tt_news record
+				$cats = $this->findCategories($id);
+				if ($status == 'delete' || ($status == 'update' && isset($thisRef->datamap['tt_news'][$id]['hidden']))) {
+					// record visibility changed, need to clear category cache
+					$this->flushListCache($cats);
+				}
+			}
+			if ($status == 'update' || $status == 'delete') {
 				$this->flushSingleCache($id);
 			}
+			
+			if (is_array($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['ttnewscache_cleartag']['clearCache'])) {
+				$params = array(
+					'status'		=> $status,
+					'table'			=> $table,
+					'id'			=> $id,
+					'fieldArray'	=> $fieldArray,
+					'categories'	=> $cats,
+					'refObj'		=> $thisRef
+				);
+								
+				foreach ($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['ttnewscache_cleartag']['clearCache'] as $_classRef) {
+					$extObj = & t3lib_div::getUserObj($_classRef);
+					if (method_exists($extObj, 'processDatamap_afterDatabaseOperations')) {
+						$extObj->processDatamap_afterDatabaseOperations($this, $params);
+					}
+				}
+			}			
 		}
+	}
+	
+	private function findCategories($id) {
+		$categories = array();
+		$rows = $GLOBALS['TYPO3_DB']->exec_SELECTgetRows('uid_foreign', 'tt_news_cat_mm', 'uid_local=' . intval($id));
+		foreach ($rows as $row) {
+			$categories[] = $row['uid_foreign'];
+		}
+		return $categories;
 	}
 
 	/**
@@ -93,9 +114,17 @@ class tx_ttnewscacheClearTag_tcemain {
 	 * @param	int		$id: tt_news id for which to clear cache
 	 * @return	void
 	 */		
-	function flushSingleCache($id) {
-		$this->getCache(); 
-		$this->pageCache->flushByTag('ttnewscache_detail_' . $id);
+	public function flushSingleCache($id) {
+		$this->flushByTag('ttnewscache_detail_' . $id);
+		
+		if (is_array($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['ttnewscache_cleartag']['clearCache'])) {
+			foreach ($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['ttnewscache_cleartag']['clearCache'] as $_classRef) {
+				$extObj = & t3lib_div::getUserObj($_classRef);
+				if (method_exists($extObj, 'flushSingleCache')) {
+					$extObj->flushSingleCache($this, $id);
+				}
+			}
+		}			
 	}
 	
 	/**
@@ -105,13 +134,28 @@ class tx_ttnewscacheClearTag_tcemain {
 	 * @param	array		$categories: categories for which to clear the cache
 	 * @return	void
 	 */	
-	function flushListCache($categories = array()) {
-		$this->getCache(); 
+	public function flushListCache($categories = array()) {
 		foreach ($categories as $cat) {
 			if (intval($cat)) {
-				$this->pageCache->flushByTag('ttnewscache_cat_' . $cat);
+				$this->flushByTag('ttnewscache_cat_' . $cat);
 			}
-		}		
+		}
+		
+		if (is_array($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['ttnewscache_cleartag']['clearCache'])) {
+			foreach ($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['ttnewscache_cleartag']['clearCache'] as $_classRef) {
+				$extObj = & t3lib_div::getUserObj($_classRef);
+				if (method_exists($extObj, 'flushListCache')) {
+					$extObj->flushListCache($this, $categories);
+				}
+			}
+		}
+	}
+	
+	private function flushByTag($tag) {
+		if ($GLOBALS['TYPO3_CONF_VARS']['SYS']['useCachingFramework']) {
+			$this->getCache();
+			$this->pageCache->flushByTag($tag);
+		}
 	}
 	
 	/**
@@ -119,7 +163,7 @@ class tx_ttnewscacheClearTag_tcemain {
 	 *
 	 * @return	void
 	 */	
-	function getCache() {
+	private function getCache() {
 		if (!isset($this->pageCache)) {
 			try {
 				$this->pageCache = $GLOBALS['typo3CacheManager']->getCache(

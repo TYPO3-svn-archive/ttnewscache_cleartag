@@ -43,7 +43,6 @@ class tx_ttnewscacheClearTag {
 	 * @return	array		$markerArray: the processed markerArray
 	 */
 	function extraItemMarkerProcessor($markerArray, $row, $lConf, &$pObj) {
-		//DebugBreak();
 		$tag = 'ttnewscache_detail_' . $row['uid'];
         $this->addTag($tag);
 		return $markerArray;
@@ -57,14 +56,27 @@ class tx_ttnewscacheClearTag {
 	 * @return	array		$markerArray: the processed markerArray
 	 */
 	function extraGlobalMarkerProcessor(&$pObj, $markerArray) {
-		//DebugBreak();
 		if ($pObj->theCode != 'SINGLE') {
-			$cats = split(',', $pObj->catExclusive);
+			$cats = explode(',', $pObj->catExclusive);
 			foreach ($cats as $cat) {
 				$this->addTag('ttnewscache_cat_' . $cat);
 			}
 		}
 		return $markerArray;
+	}
+	
+	/**
+	* Set the time when the page cache should expire.
+	* This is needed because there may be records with starttime before the default cache lifetime ends
+	* 
+	* @param	integer		Timestamp of when the cache should expire.
+	*/
+	public static function addTimeout($expire) {
+		$defaultTimeout = $GLOBALS['TSFE']->get_cache_timeout();
+		if (($GLOBALS['EXEC_TIME'] + $defaultTimeout) > $expire) {
+			$GLOBALS['TSFE']->set_cache_timeout_default(intval($expire - $GLOBALS['EXEC_TIME']));
+		}
+		return $GLOBALS['TSFE']->get_cache_timeout();
 	}
 	
 	/**

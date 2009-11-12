@@ -11,7 +11,7 @@
 ########################################################################
 
 $EM_CONF[$_EXTKEY] = array(
-	'title' => 'ttnews cache clear by tag',
+	'title' => 'ttnews Cache Clear by Tag',
 	'description' => '',
 	'category' => 'be',
 	'author' => 'Dan Osipov',
@@ -33,6 +33,7 @@ $EM_CONF[$_EXTKEY] = array(
 	'constraints' => array(
 		'depends' => array(
 			'tt_news' => '',
+			'typo3' => '4.3.0-0.0.0',
 		),
 		'conflicts' => array(
 		),
