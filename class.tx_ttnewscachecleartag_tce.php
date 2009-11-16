@@ -29,7 +29,7 @@
  *
  * @author    Krystian Szymukowicz <typo3@prolabium.com>
  */
-class tx_ttnewscacheClearTag_tcemain {
+class tx_ttnewscachecleartag_tcemain {
 
 	var $extKey = 'ttnewscache_cleartag';
 	
@@ -43,7 +43,7 @@ class tx_ttnewscacheClearTag_tcemain {
 	 * @param	object		Parent object.
 	 * @return	void
 	 */
-	function processCmdmap_preProcess ($command, $table, $id, $value, &$thisRef) {
+	public function processCmdmap_preProcess ($command, $table, $id, $value, &$thisRef) {
 		if ($command == 'delete' && $table == 'tt_news') {
 			$fieldArray = array();
 			$this->processDatamap_afterDatabaseOperations($command, $table, $id, $fieldArray, $thisRef);
@@ -60,7 +60,7 @@ class tx_ttnewscacheClearTag_tcemain {
 	 * @param	object		Parent object.
 	 * @return	void
 	 */
-	function processDatamap_afterDatabaseOperations($status, $table, $id, &$fieldArray, &$thisRef) {
+	public function processDatamap_afterDatabaseOperations($status, $table, $id, &$fieldArray, &$thisRef) {
 		if ($table == 'tt_news') {
 			if (!empty($thisRef->datamap['tt_news'][$id]['category'])) {
 				$cats = explode(',', t3lib_div::rm_endcomma($thisRef->datamap['tt_news'][$id]['category']));
@@ -98,7 +98,13 @@ class tx_ttnewscacheClearTag_tcemain {
 		}
 	}
 	
-	private function findCategories($id) {
+	/**
+	* Find categories, given tt_news UID
+	* 
+	* @param	integer		UID of tt_news record
+	* @return	array		Array of categories
+	*/
+	public function findCategories($id) {
 		$categories = array();
 		$rows = $GLOBALS['TYPO3_DB']->exec_SELECTgetRows('uid_foreign', 'tt_news_cat_mm', 'uid_local=' . intval($id));
 		foreach ($rows as $row) {
@@ -151,6 +157,11 @@ class tx_ttnewscacheClearTag_tcemain {
 		}
 	}
 	
+	/**
+	* Flush page cache by tag.
+	* 
+	* @param	string		Tag to clear cache by
+	*/
 	private function flushByTag($tag) {
 		if ($GLOBALS['TYPO3_CONF_VARS']['SYS']['useCachingFramework']) {
 			$this->getCache();

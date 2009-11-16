@@ -29,7 +29,7 @@
  *
  * @author    Krystian Szymukowicz <typo3@prolabium.com>
  */
-class tx_ttnewscacheClearTag {
+class tx_ttnewscachecleartag {
 
 	var $extKey = 'ttnewscache_cleartag';
 	

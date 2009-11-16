@@ -1,3 +1,8 @@
+09-11-16 Dan Osipov  <dosipov@phillyburbs.com>
+
+	* Enabled use of autoloader by renaming classes & adding ext_autoload.php
+	* Added documentation of functions
+
 09-11-11 Dan Osipov  <dosipov@phillyburbs.com>
 
 	* Better compatibility with PHP 5.3 by removing calls to deprecated functions
