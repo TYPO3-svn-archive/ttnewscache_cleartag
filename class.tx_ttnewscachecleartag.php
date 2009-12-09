@@ -95,4 +95,8 @@ class tx_ttnewscachecleartag {
 	}
 	
 }
+
+if (defined('TYPO3_MODE') && $TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['ext/ttnewscache_cleartag/class.tx_ttnewscachecleartag.php']) {
+	include_once($TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['ext/ttnewscache_cleartag/class.tx_ttnewscachecleartag.php']);
+}
 ?>
