@@ -2,6 +2,7 @@
 	* Changed icon for the extension
 	* Inserted XCLASS include code
 	* Changed private function to public
+	* Updated ext_emconf.php after upload
 
 09-11-16 Dan Osipov  <dosipov@phillyburbs.com>
 
