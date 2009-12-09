@@ -162,7 +162,7 @@ class tx_ttnewscachecleartag_tcemain {
 	* 
 	* @param	string		Tag to clear cache by
 	*/
-	private function flushByTag($tag) {
+	public function flushByTag($tag) {
 		if ($GLOBALS['TYPO3_CONF_VARS']['SYS']['useCachingFramework']) {
 			$this->getCache();
 			$this->pageCache->flushByTag($tag);
@@ -190,5 +190,9 @@ class tx_ttnewscachecleartag_tcemain {
 		}
 	}
 	
+}
+
+if (defined('TYPO3_MODE') && $TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['ext/ttnewscache_cleartag/class.tx_ttnewscachecleartag_tce.php']) {
+	include_once($TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['ext/ttnewscache_cleartag/class.tx_ttnewscachecleartag_tce.php']);
 }
 ?>

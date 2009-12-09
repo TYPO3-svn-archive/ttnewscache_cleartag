@@ -1,3 +1,8 @@
+09-12-09 Dan Osipov  <dosipov@phillyburbs.com>
+	* Changed icon for the extension
+	* Inserted XCLASS include code
+	* Changed private function to public
+
 09-11-16 Dan Osipov  <dosipov@phillyburbs.com>
 
 	* Enabled use of autoloader by renaming classes & adding ext_autoload.php
